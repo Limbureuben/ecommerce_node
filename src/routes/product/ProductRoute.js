@@ -5,6 +5,7 @@ const path = require('path');
 const authMiddleware = require('../../utils/authMiddleware');
 
 const router = express.Router();
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/product_images');
@@ -80,32 +81,34 @@ router.get('/get-all-products', async (req, res) => {
 
 //update rest API
 
-router.put('/update-product/:id', async (req, res) => {
-    try {
-        const updateProduct = await Product.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        );
+router.put("/update-product/:id", upload.single("image"), async (req, res) => {
+  try {
+    const data = {
+      name: req.body.name,
+      category: req.body.category,
+      price: req.body.price,
+      description: req.body.description,
+    };
 
-        if (!updateProduct) {
-            return res.json({
-              success: false,
-                message: 'Product not found'
-            });
-        }
-
-        res.status(200).json({
-          success: true,
-            message: 'Product updated successfully',
-            updateProduct
-        });
-    } catch(err) {
-        return res.json({
-          success: false,
-        message: err.message
-        });
+    // Only update image if new file is uploaded
+    if (req.file) {
+      data.image = `${req.protocol}://${req.get("host")}/public/product_images/${req.file.filename}`;
     }
+
+    const updateProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      data,
+      { new: true, runValidators: true }
+    );
+
+    if (!updateProduct) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Product updated successfully", updateProduct });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
 
