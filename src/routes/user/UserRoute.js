@@ -126,6 +126,13 @@ router.get('/get-all-users', async (req, res) => {
 
 
 router.get('/profile', authMiddleware, (req, res) => {
+
+    if (!req.user) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+    }
     return res.status(200).json({
         success: true,
         message: 'This is your profile',
