@@ -1,10 +1,9 @@
 const express = require('express');
 const  Product = require('../../model/product/productModel');
-const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 
-
+const router = express.Router();
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/product_images');
@@ -27,14 +26,14 @@ const upload = multer({
   },
 });
 
+
 router.post('/product-register', upload.single('image'), async (req, res) => {
     const { name, category, price, description } = req.body;
-
     try {
         const imageUrl = req.file
       ? `${req.protocol}://${req.get('host')}/public/product_images/${req.file.filename}`
       : null;
-
+      
         const products = await Product.create({
             name,
             category,
@@ -56,14 +55,6 @@ router.post('/product-register', upload.single('image'), async (req, res) => {
     }
 });
 
-router.use((err, req, res, next) => {
-  if (err instanceof multer.MulterError) {
-    return res.status(400).json({ success: false, message: err.message });
-  } else if (err) {
-    return res.status(400).json({ success: false, message: err.message });
-  }
-  next();
-});
 
 //we will add a middleeware to authenticate the user
 router.get('/get-all-products', async (req, res) => {
@@ -129,12 +120,41 @@ router.delete('/delete-product/:id', async (req, res) => {
 
         res.status(200).json({
             success: true,
-            messag: 'Product delete successfuly'
+            message: 'Product deleted successfully'
         });
     } catch(err) {
-        res.json({message: err.message})
+        res.status(500).json({ message: err.message });
     }
 } );
 
-//so now we can fetch, update and delete product
+
+
+router.put("/product/:id/purchase", async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { status: "purchased" },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      product,
+      message: "Product marked as purchased",
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: "Failed to update product status",
+      error: err.message,
+    });
+  }
+});
+
+
+
 module.exports = router;

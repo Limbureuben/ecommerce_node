@@ -5,6 +5,7 @@ const mongoConnect = require('./src/config/db');
 const cors = require('cors');
 const UserRoute = require('./src/routes/user/UserRoute');
 const ProductRoute = require('./src/routes/product/ProductRoute');
+const path = require("path");
 
 const app = express();
 
@@ -18,6 +19,7 @@ async function startServer() {
 
   //connect database
   await mongoConnect();
+  app.use("/public", express.static(path.join(__dirname, "public")));
 
   //my routes
   app.use('/api/users', UserRoute)
