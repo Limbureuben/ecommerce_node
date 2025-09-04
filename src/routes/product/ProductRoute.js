@@ -2,6 +2,7 @@ const express = require('express');
 const  Product = require('../../model/product/productModel');
 const multer = require('multer');
 const path = require('path');
+const authMiddleware = require('../../utils/authMiddleware');
 
 const router = express.Router();
 const storage = multer.diskStorage({
@@ -33,7 +34,7 @@ router.post('/product-register', upload.single('image'), async (req, res) => {
         const imageUrl = req.file
       ? `${req.protocol}://${req.get('host')}/public/product_images/${req.file.filename}`
       : null;
-      
+
         const products = await Product.create({
             name,
             category,
@@ -89,16 +90,19 @@ router.put('/update-product/:id', async (req, res) => {
 
         if (!updateProduct) {
             return res.json({
+              success: false,
                 message: 'Product not found'
             });
         }
 
         res.status(200).json({
+          success: true,
             message: 'Product updated successfully',
             updateProduct
         });
     } catch(err) {
         return res.json({
+          success: false,
         message: err.message
         });
     }
