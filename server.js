@@ -6,6 +6,8 @@ const cors = require('cors');
 const UserRoute = require('./src/routes/user/UserRoute');
 const ProductRoute = require('./src/routes/product/ProductRoute');
 const path = require("path");
+const paymentRoute = require('./src/routes/payment/paymentRoute');
+const handleZenoWebhook = require('./src/webhook/webhook');
 
 const app = express();
 
@@ -24,6 +26,8 @@ async function startServer() {
   //my routes
   app.use('/api/users', UserRoute)
   app.use('/api/products', ProductRoute)
+  app.use('/api/payment', paymentRoute)
+  app.use("/api/webhook/zenopay", handleZenoWebhook);
 
   const port = 5000;
   app.listen(port, () => { console.log(`Server running on http://localhost:${port}`); });
