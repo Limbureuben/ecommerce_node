@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const authMiddleware = require('../../utils/authMiddleware');
+const Product = require('../../model/product/productModel');
 
 const generateToken = (user) => {
     return jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
@@ -106,7 +107,7 @@ router.post('/login', async (req, res) => {
 
 
 
-router.get('/get-all-users', async (req, res) => {
+router.get('/get-all-users', authMiddleware, async (req, res) => {
     try {
         const user = await User.find();
 
@@ -138,6 +139,26 @@ router.get('/profile', authMiddleware, (req, res) => {
         message: 'This is your profile',
         user: req.user
     });
+});
+
+
+router.get('/stats', authMiddleware, async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments({ role: "user"});
+
+        const totalProduct = await Product.countDocuments();
+
+        return res.status(200).json({
+            success:true,
+            totalUsers,
+            totalProduct
+        });
+    } catch(err) {
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
 });
 
 

@@ -29,7 +29,7 @@ const upload = multer({
 });
 
 
-router.post('/product-register', upload.single('image'), async (req, res) => {
+router.post('/product-register', authMiddleware, upload.single('image'), async (req, res) => {
     const { name, category, price, description } = req.body;
     try {
         const imageUrl = req.file
@@ -59,7 +59,7 @@ router.post('/product-register', upload.single('image'), async (req, res) => {
 
 
 //we will add a middleeware to authenticate the user
-router.get('/get-all-products', async (req, res) => {
+router.get('/get-all-products', authMiddleware, async (req, res) => {
     try {
         const products = await Product.find();
 
@@ -81,7 +81,7 @@ router.get('/get-all-products', async (req, res) => {
 
 //update rest API
 
-router.put("/update-product/:id", upload.single("image"), async (req, res) => {
+router.put("/update-product/:id",  authMiddleware, upload.single("image"), async (req, res) => {
   try {
     const data = {
       name: req.body.name,
@@ -112,7 +112,7 @@ router.put("/update-product/:id", upload.single("image"), async (req, res) => {
 });
 
 
-router.delete('/delete-product/:id', async (req, res) => {
+router.delete('/delete-product/:id', authMiddleware, async (req, res) => {
     try {
         const deleteproduct = await Product.findByIdAndDelete(
             req.params.id
@@ -136,7 +136,7 @@ router.delete('/delete-product/:id', async (req, res) => {
 
 
 
-router.put("/product/:id/purchase", async (req, res) => {
+router.put("/product/:id/purchase", authMiddleware, async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(
       req.params.id,
@@ -161,7 +161,5 @@ router.put("/product/:id/purchase", async (req, res) => {
     });
   }
 });
-
-
 
 module.exports = router;
