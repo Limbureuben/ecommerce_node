@@ -1,11 +1,7 @@
 const axios = require("axios");
-const { v4: uuidv4 } = require("uuid");
-
-const ZENOPAY_URL = "https://zenoapi.com/api/payments/mobile_money_tanzania";
-const STATUS_URL = "https://zenoapi.com/api/payments/order-status";
-const API_KEY = process.env.ZENOPAY_API_KEY;
 
 async function createPayment({ name, phone, email, amount }) {
+  const { v4: uuidv4 } = await import("uuid"); // dynamic import
   const orderId = uuidv4();
 
   const payload = {
@@ -17,9 +13,9 @@ async function createPayment({ name, phone, email, amount }) {
     webhook_url: `${process.env.BASE_URL}/api/webhook/zenopay`,
   };
 
-  const res = await axios.post(ZENOPAY_URL, payload, {
+  const res = await axios.post("https://zenoapi.com/api/payments/mobile_money_tanzania", payload, {
     headers: {
-      "x-api-key": API_KEY,
+      "x-api-key": process.env.ZENOPAY_API_KEY,
       "Content-Type": "application/json",
     },
   });
@@ -28,8 +24,8 @@ async function createPayment({ name, phone, email, amount }) {
 }
 
 async function checkPaymentStatus(orderId) {
-  const res = await axios.get(`${STATUS_URL}?order_id=${orderId}`, {
-    headers: { "x-api-key": API_KEY },
+  const res = await axios.get(`https://zenoapi.com/api/payments/order-status?order_id=${orderId}`, {
+    headers: { "x-api-key": process.env.ZENOPAY_API_KEY },
   });
 
   return res.data;
