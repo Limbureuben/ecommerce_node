@@ -1,5 +1,5 @@
 const express = require('express');
-const  Product = require('../../model/product/productModel');
+const Product = require('../../model/product/productModel');
 const multer = require('multer');
 const path = require('path');
 const authMiddleware = require('../../utils/authMiddleware');
@@ -30,29 +30,41 @@ const upload = multer({
 
 
 router.post('/product-register', authMiddleware, upload.single('image'), async (req, res) => {
-    const { name, category, price, description } = req.body;
+    const { productName, category, realPrice, discount, descriptions, size, totalReviews } = req.body;
+    
+    if (!productName || !category || !realPrice || !descriptions || !size) {
+        return res.status(400).json({
+            success: false,
+            message: 'Please provide all mandatory fields: productName, category, realPrice, descriptions, size'
+        });
+    }
+
     try {
         const imageUrl = req.file
       ? `${req.protocol}://${req.get('host')}/public/product_images/${req.file.filename}`
       : null;
 
-        const products = await Product.create({
-            name,
+        const product = await Product.create({
+            productName,
             category,
-            price,
-            description,
+            realPrice,
+            discount,
+            descriptions,
+            size,
+            totalReviews,
             image: imageUrl
         });
         res.status(200).json({
             success: true,
-            product: products,
-            message: 'Product registred successfully',
+            product: product,
+            message: 'Product registered successfully',
         });
     } catch( err){
         res.status(400).json({
             success: false,
             product: null,
-            message: 'Failed to register product', err
+            message: 'Failed to register product', 
+            error: err.message
         });
     }
 });
@@ -84,10 +96,13 @@ router.get('/get-all-products', authMiddleware, async (req, res) => {
 router.put("/update-product/:id",  authMiddleware, upload.single("image"), async (req, res) => {
   try {
     const data = {
-      name: req.body.name,
+      productName: req.body.productName,
       category: req.body.category,
-      price: req.body.price,
-      description: req.body.description,
+      realPrice: req.body.realPrice,
+      discount: req.body.discount,
+      descriptions: req.body.descriptions,
+      size: req.body.size,
+      totalReviews: req.body.totalReviews,
     };
 
     // Only update image if new file is uploaded

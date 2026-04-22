@@ -29,7 +29,7 @@ async function startServer() {
   app.use('/api/payment', paymentRoute)
   app.use("/api/webhook/zenopay", handleZenoWebhook);
 
-  const port = 5000;
+  const port = 4000;
   app.listen(port, () => { console.log(`Server running on http://localhost:${port}`); });
 }
 
