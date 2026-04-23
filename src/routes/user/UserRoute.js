@@ -22,7 +22,6 @@ router.post('/register', async (req, res) => {
             message: 'Please enter all fields'
         });
     }
-
     if (password !== confirmPassword) {
         return res.status(400).json({
             success: false,
